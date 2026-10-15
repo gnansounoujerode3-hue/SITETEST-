@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claude Code × Montage — motion</title>
+  <style>
+    :root {
+      --motion-ease-out: cubic-bezier(.2, .8, .2, 1);
+      --motion-fast: 180ms;
+      --motion-enter: 520ms;
+      --bg: #07080b;
+      --fg: #f6f3ec;
+      --teal: #3ee0c6;
+      --amber: #e8b86d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    body { display: grid; place-items: center; }
+    .stage {
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      position: relative;
+      overflow: hidden;
+      background: #000;
+      isolation: isolate;
+    }
+    .ken {
+      position: absolute; inset: -8%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity var(--motion-enter) var(--motion-ease-out);
+      will-change: transform, opacity;
+    }
+    .ken.on {
+      opacity: 1;
+      animation: ken 12s linear forwards;
+    }
+    @keyframes ken {
+      from { transform: scale(1.08) translate3d(-1.2%, 0, 0); }
+      to   { transform: scale(1) translate3d(1.2%, 0, 0); }
+    }
+    .vignette {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.35) 0%, transparent 22%, transparent 55%, rgba(0,0,0,.78) 100%);
+    }
+    .grain {
+      position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .07;
+      background-image: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+    }
+    .topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 4;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.25rem;
+      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--teal);
+    }
+    .topbar b { color: var(--fg); font-weight: 600; letter-spacing: .08em; }
+    .lower {
+      position: absolute; left: 1.25rem; right: 1.25rem; bottom: 1.35rem; z-index: 5;
+      transform: translateY(14px); opacity: 0;
+    }
+    .lower.show {
+      opacity: 1; transform: translateY(0);
+      transition: opacity var(--motion-enter) var(--motion-ease-out),
+                  transform var(--motion-enter) var(--motion-ease-out);
+    }
+    .kicker {
+      display: inline-block;
+      font-size: .7rem; letter-spacing: .18em; text-transform: uppercase;
+      color: #04110e; background: var(--teal); padding: .28rem .55rem;
+      margin-bottom: .55rem;
+    }
+    .caption {
+      font-size: clamp(1rem, 2.4vw, 1.55rem);
+      line-height: 1.28; max-width: 38rem;
+      text-shadow: 0 2px 18px #000;
+    }
+    .caption .w { display: inline; }
+    .caption .w.hot { color: var(--amber); }
+    .row {
+      margin-top: .7rem; display: flex; gap: .75rem; align-items: center;
+      font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #c9c4b8;
+    }
+    .progress { flex: 1; height: 3px; background: #2a2a2a; }
+    .progress > i {
+      display: block; height: 100%; width: 0%;
+      background: var(--teal);
+      transition: width 80ms linear;
+    }
+    .play {
+      position: absolute; inset: 0; z-index: 8;
+      display: grid; place-items: center;
+      background: rgba(7,8,11,.5);
+      border: 0; color: inherit; cursor: pointer;
+    }
+    .play span {
+      width: 88px; height: 88px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--teal); color: #04110e; font-size: 1.8rem;
+      transition: transform var(--motion-fast) var(--motion-ease-out),
+                  box-shadow var(--motion-fast) var(--motion-ease-out);
+      box-shadow: 0 12px 40px rgba(62,224,198,.28);
+    }
+    .play:hover span, .play:focus-visible span { transform: translateY(-2px); }
+    .play:active span { transform: scale(.98); }
+    .play:focus-visible { outline: none; }
+    .play:focus-visible span { outline: 3px solid var(--fg); outline-offset: 4px; }
+    .play.hidden { display: none; }
+    .skills {
+      position: absolute; top: 2.4rem; left: 1.25rem; z-index: 4;
+      display: flex; gap: .4rem; flex-wrap: wrap; max-width: 70%;
+      opacity: 0; transform: translateY(10px);
+    }
+    .skills.on {
+      opacity: .9; transform: none;
+      transition: opacity 400ms var(--motion-ease-out) 80ms,
+                  transform 400ms var(--motion-ease-out) 80ms;
+    }
+    .chip {
+      font-size: .62rem; letter-spacing: .08em; text-transform: uppercase;
+      border: 1px solid rgba(62,224,198,.35); padding: .2rem .45rem; color: var(--teal);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+      .ken, .ken.on { transform: none; opacity: 1; }
+      .lower { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="ken" id="ken"></div>
+    <div class="vignette"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="topbar"><span><b>COOL</b> · motion</span><span id="tc">00:00</span></div>
+    <div class="skills" id="skills">
+      <span class="chip">MOTION-DESIGN.md</span>
+      <span class="chip">ffmpeg-skill</span>
+      <span class="chip">videoediting</span>
+      <span class="chip">Ken Burns</span>
+      <span class="chip">lower-third</span>
+    </div>
+    <button class="play" id="play" type="button" aria-label="Lancer"><span>▶</span></button>
+    <div class="lower" id="lower">
+      <div class="kicker" id="kicker">01 — Intro</div>
+      <p class="caption" id="cap"></p>
+      <div class="row">
+        <span id="idx">01 / 08</span>
+        <div class="progress"><i id="pbar"></i></div>
+        <span>VO FR</span>
+      </div>
+    </div>
+  </div>
+  <audio id="aud"></audio>
+  <script>
+    const scenes = [
+      { img: "slides/01-intro.png", audio: "audio/01.mp3", k: "01 — Intro", cap: "Claude Code n’est pas un NLE. C’est un agent qui écrit les commandes autour de votre montage." },
+      { img: "slides/02-pas-nle.png", audio: "audio/02.mp3", k: "02 — Rôle", cap: "Vous gardez le goût. Lui, la répétition : FFmpeg, SRT, lots, formats." },
+      { img: "slides/03-brief.png", audio: "audio/03.mp3", k: "03 — Probe & brief", cap: "Ouvrez le projet, rangez les rushes, donnez un brief net : durée, format, rythme." },
+      { img: "slides/04-ffmpeg.png", audio: "audio/04.mp3", k: "04 — Dry-run", cap: "Inspectez, relisez le script FFmpeg, validez, lancez. Jamais d’overwrite source." },
+      { img: "slides/05-subs.png", audio: "audio/05.mp3", k: "05 — Captions", cap: "SRT calé, gravé ou muxé. Texte jamais réécrit. Look sheet avant livraison." },
+      { img: "slides/06-batch.png", audio: "audio/06.mp3", k: "06 — Batch", cap: "9:16, extraits, miniatures, version sans musique. Un recipe, des dizaines de fichiers." },
+      { img: "slides/07-humain.png", audio: "audio/07.mp3", k: "07 — Jugement", cap: "Le silence, le regard, le rythme : ça reste vous. L’outil accélère la technique." },
+      { img: "slides/08-fin.png", audio: "audio/08.mp3", k: "08 — Livrable", cap: "Brief clair. Scripts reproductibles. Relisez avant d’exporter." }
+    ];
+    const ken = document.getElementById("ken");
+    const cap = document.getElementById("cap");
+    const kicker = document.getElementById("kicker");
+    const idx = document.getElementById("idx");
+    const pbar = document.getElementById("pbar");
+    const aud = document.getElementById("aud");
+    const play = document.getElementById("play");
+    const lower = document.getElementById("lower");
+    const skills = document.getElementById("skills");
+    const tc = document.getElementById("tc");
+    let i = 0, t0 = 0, raf, words = [];
+
+    function wordsOf(s) {
+      cap.innerHTML = s.split(" ").map(w => `<span class="w">${w} </span>`).join("");
+      words = [...cap.querySelectorAll(".w")];
+    }
+    function show(n) {
+      i = n;
+      const s = scenes[n];
+      ken.classList.remove("on");
+      lower.classList.remove("show");
+      void ken.offsetWidth;
+      ken.style.backgroundImage = `url("${s.img}")`;
+      kicker.textContent = s.k;
+      idx.textContent = String(n + 1).padStart(2, "0") + " / 08";
+      wordsOf(s.cap);
+      requestAnimationFrame(() => {
+        ken.classList.add("on");
+        lower.classList.add("show");
+        skills.classList.add("on");
+      });
+      aud.src = s.audio;
+      aud.play();
+    }
+    function tick() {
+      if (aud.duration) {
+        const p = aud.currentTime / aud.duration;
+        pbar.style.width = (100 * p) + "%";
+        const hi = Math.min(words.length - 1, Math.floor(p * words.length));
+        words.forEach((w, j) => w.classList.toggle("hot", j === hi));
+      }
+      const el = performance.now() - t0;
+      const m = Math.floor(el / 60000);
+      const sec = Math.floor((el / 1000) % 60);
+      tc.textContent = String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+      raf = requestAnimationFrame(tick);
+    }
+    aud.addEventListener("ended", () => {
+      if (i < scenes.length - 1) show(i + 1);
+      else play.classList.remove("hidden");
+    });
+    play.addEventListener("click", () => {
+      play.classList.add("hidden");
+      t0 = performance.now();
+      cancelAnimationFrame(raf);
+      tick();
+      show(0);
+    });
+  </script>
+</body>
+</html>
